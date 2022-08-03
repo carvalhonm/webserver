@@ -1,0 +1,7 @@
+fix|refactor|perf|test|feat: #<ISSUE ID> - Title of what was done
+
+WHAT:
+  * Bullet points of what was done on this commit
+
+WHY:
+  Why is this commit important

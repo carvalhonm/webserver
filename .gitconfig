@@ -1,0 +1,9 @@
+# It is not possible to automatically include your custom configuration file through git alone, because it creates a security vulnerability.
+# To apply this configuration for a single repository, each user will need to run the following command in your-repo/:
+# Be careful not to store personal data in the custom .gitconfig, like user.*, keep those in your global .gitconfig.
+
+# git config --local include.path ../.gitconfig
+
+[commit]
+  template = ./.gitmessage
+

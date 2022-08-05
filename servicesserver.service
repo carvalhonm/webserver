@@ -1,0 +1,11 @@
+[Unit]
+Description=ServicesServer
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/node /opt/server/bin/www
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+Alias=services-server.service

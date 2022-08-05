@@ -9,10 +9,4 @@ WORKDIR '/app'
 COPY . /app
 RUN npm i
 
-ENV APP_PORT=80
-EXPOSE $APP_PORT
-
-ENV ADMIN_KEY=testing
-EXPOSE $ADMIN_KEY
-
 CMD ["node", "bin/www"]

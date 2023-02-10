@@ -21,7 +21,7 @@ const getAllFiles = (dirPath, arrayOfFiles, parentFolder, level) => {
         parentFolder = file;
       }
       arrayOfFiles = getAllFiles(filePath, arrayOfFiles, parentFolder, level);
-    } else if (file.split('.').slice(-1).pop() === 'mp4') {
+    } else if (file.split('.').slice(-1).pop() === 'mp4' || file.split('.').slice(-1).pop() === 'mkv') {
       const fileName = file.split('.').slice(0, -1).join('.');
       const obj = {
         genre: parentFolder,

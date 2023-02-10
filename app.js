@@ -3,16 +3,19 @@ const cors = require('cors');
 
 const tests = require('./routes/tests');
 const fileList = require('./routes/files');
+const fileCheck = require('./routes/file-check');
 
 const app = express();
+const publicApp = express();
 const log = require('./services/log');
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.static('public'));
+publicApp.use(express.static('public'));
 
 app.use((req, res, next) => {
+  // log(req);
   log(`Method: ${req.method}\noriginalUrl: ${req.originalUrl}\nPath: ${req.path}`);
   if (!req.headers.authorization || req.headers.authorization !== process.env.ADMIN_KEY) {
     log('No authorization send');
@@ -24,5 +27,9 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/test', tests);
 app.use('/api/v1/list-files', fileList);
+app.use('/api/v1/file-check', fileCheck);
 
-module.exports = app;
+module.exports = {
+  app,
+  publicApp,
+};

@@ -15,7 +15,7 @@ const data = {
     {
       name: 'Turtle',
       thumb: 'http://www.vidsplay.com/wp-content/uploads/2017/04/turtle-screenshot.jpg',
-      video: 'http://192.168.1.90/A_Família_Addams.mp4',
+      video: 'http://192.168.1.90%2FHarry%20Potter%2F03%20-%20Harry%20Potter%20e%20o%20Prisioneiro%20de%20Azkaban.mp4',
       genre: 'Animals',
     },
   ],

@@ -1,6 +1,5 @@
 const express = require('express');
 
-const sampleData = require('../sampleData');
 const log = require('../services/log');
 const Redis = require('../services/redis');
 
@@ -37,7 +36,6 @@ router.all('/categories', (req, res, next) => {
   return res.status(204).json({ status: 'No Content' });
 }); */
 router.all('/categories/:id', async (req, res, next) => {
-  // log(Object.keys(sampleData));
   log(req.params.id);
   /* if (data[req.params.id] !== undefined) {
     return res.status(200).json(data[req.params.id]);
@@ -65,6 +63,6 @@ router.all('/categories/:id', async (req, res, next) => {
   return res.status(200).json(response);
 });
 
-router.all('/', (_req, res) => res.status(200).json(sampleData));
+// router.all('/', (_req, res) => res.status(200).json(sampleData));
 
 module.exports = router;

@@ -14,7 +14,7 @@ const log = require('./services/log');
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-publicApp.use(express.static('public'));
+publicApp.use(express.static(process.env.PUBLIC_FOLDER));
 
 app.use((req, res, next) => {
   // log(req);

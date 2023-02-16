@@ -5,6 +5,7 @@ After=network.target
 [Service]
 ExecStart=/usr/bin/node /opt/server/bin/www
 Restart=always
+TimeoutSec=900
 
 [Install]
 WantedBy=multi-user.target

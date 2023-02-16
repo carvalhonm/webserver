@@ -12,12 +12,13 @@ const router = express.Router();
 const publicFolder = process.env.PUBLIC_FOLDER;
 
 const getAllFiles = (dirPath, arrayOfFiles, parentFolder, level) => {
+  const parentFolderSize = publicFolder.split('/').length;
   const files = fs.readdirSync(dirPath);
   const publicUrl = `${process.env.PUBLIC_URL}:${process.env.PUBLIC_PORT}`;
   files.forEach((file) => {
     const filePath = `${dirPath}/${file}`;
     if (fs.statSync(filePath).isDirectory()) {
-      if (filePath.split('/').length === 2) {
+      if (filePath.split('/').length === parentFolderSize + 1) {
         parentFolder = file;
       }
       arrayOfFiles = getAllFiles(filePath, arrayOfFiles, parentFolder, level);

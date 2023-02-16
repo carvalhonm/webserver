@@ -23,15 +23,16 @@ const getAllFiles = (dirPath, arrayOfFiles, parentFolder, level) => {
       arrayOfFiles = getAllFiles(filePath, arrayOfFiles, parentFolder, level);
     } else if (file.split('.').slice(-1).pop() === 'mp4' || file.split('.').slice(-1).pop() === 'mkv') {
       const fileName = file.split('.').slice(0, -1).join('.');
+
       const obj = {
         genre: parentFolder,
         name: fileName,
-        video: `${publicUrl}/${uri
-          .serialize(uri.parse(path.join(dirPath, '/', file)))
-          .replace(`${publicFolder}/`, '')}`,
-        thumb: `${publicUrl}/${uri
-          .serialize(uri.parse(path.join(dirPath, '/', `${fileName}.jpg`)))
-          .replace(`${publicFolder}/`, '')}`,
+        video: `${publicUrl}/${uri.serialize(
+          uri.parse(path.join(dirPath, '/', file).replace(`${publicFolder}/`, ''))
+        )}`,
+        thumb: `${publicUrl}/${uri.serialize(
+          uri.parse(path.join(dirPath, '/', `${fileName}.jpg`).replace(`${publicFolder}/`, ''))
+        )}`,
       };
       arrayOfFiles.push(obj);
       const imageName = `${fileName}.jpg`;

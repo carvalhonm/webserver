@@ -11,6 +11,8 @@ const router = express.Router();
 
 const publicFolder = process.env.PUBLIC_FOLDER;
 
+const allowTypes = ['mp4', 'mkv', 'm4v'];
+
 const getAllFiles = (dirPath, arrayOfFiles, parentFolder, level) => {
   const parentFolderSize = publicFolder.split('/').length;
   const files = fs.readdirSync(dirPath);
@@ -22,7 +24,7 @@ const getAllFiles = (dirPath, arrayOfFiles, parentFolder, level) => {
         parentFolder = file;
       }
       arrayOfFiles = getAllFiles(filePath, arrayOfFiles, parentFolder, level);
-    } else if (file.split('.').slice(-1).pop() === 'mp4' || file.split('.').slice(-1).pop() === 'mkv') {
+    } else if (allowTypes.includes(file.split('.').slice(-1).pop())) {
       const fileName = file.split('.').slice(0, -1).join('.');
 
       const obj = {

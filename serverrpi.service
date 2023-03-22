@@ -3,10 +3,10 @@ Description=ServicesServer
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/node /opt/server/bin/www
+ExecStart=/usr/bin/node /opt/serverrpi/bin/www
 Restart=always
 TimeoutSec=900
-EnvironmentFile=/opt/server/.env
+EnvironmentFile=/opt/serverrpi/.env
 
 [Install]
 WantedBy=multi-user.target

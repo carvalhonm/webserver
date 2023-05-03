@@ -67,7 +67,6 @@ const updateRedis = (files) => {
     }
     index = `${file.genre.replace(/(&|\(|\)|'|")/g, '')}:${index}`;
     redis.set(index, JSON.stringify(file));
-    log(file);
   });
 };
 

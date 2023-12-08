@@ -1,12 +1,13 @@
 [Unit]
 Description=ServicesServer
-After=network.target
+After=media-nuno-4C42\x2d5F9B.mount
 
 [Service]
 ExecStart=/usr/bin/node /opt/serverrpi/bin/www
 Restart=always
-TimeoutSec=900
 EnvironmentFile=/opt/serverrpi/.env
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target

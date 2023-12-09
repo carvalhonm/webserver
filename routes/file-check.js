@@ -110,7 +110,7 @@ const updateRedis = (files) => {
   });
 };
 
-router.get('', (_req, res) => {
+/* router.get('', (_req, res) => {
   const parentFolders = fs.readdirSync(publicFolder);
 
   const fullFiles = [];
@@ -120,17 +120,14 @@ router.get('', (_req, res) => {
     fullFiles.push(files);
   });
   res.status(200).json(fullFiles);
+}); */
 
-  /* const files = getAllFiles(publicFolder, [], '', 0);
-  updateRedis(files);
-  res.status(200).json(files);
-   */
-});
-
+log('Start SERVICE File Analisys');
 const parentFolders = fs.readdirSync(publicFolder);
 
 const fullFiles = [];
 parentFolders.forEach((folder) => {
+  log(`Processing Folder ${folder}`);
   const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
   updateRedis(files);
   fullFiles.push(files);

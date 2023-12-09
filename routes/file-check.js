@@ -131,6 +131,7 @@ parentFolders.forEach((folder) => {
   const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
   updateRedis(files);
   fullFiles.push(files);
+  log(`Finnish Processing Folder ${folder}`);
 });
 
 module.exports = router;

@@ -27,10 +27,12 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
       log('File in parent directory, ignoring for now, kind of');
       const fileName = dirPath.replace(`${publicFolder}/`, '').split('.').slice(0, -1).join('.');
       const imageName = `${dirPath}.jpg`;
+      const subtitleName = `${dirPath}.srt`;
       const obj = {
         parent: 'all',
         genre: parentFolder,
         name: fileName,
+        subtitles: `${publicUrl}/${uri.serialize(uri.parse(subtitleName.replace(`${publicFolder}/`, '')))}`,
         video: `${publicUrl}/${uri.serialize(uri.parse(dirPath.replace(`${publicFolder}/`, '')))}`,
         thumb: `${publicUrl}/${uri.serialize(uri.parse(imageName.replace(`${publicFolder}/`, '')))}`,
       };
@@ -61,10 +63,14 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
     } else if (allowTypes.includes(file.split('.').slice(-1).pop())) {
       const fileName = file.split('.').slice(0, -1).join('.');
       const imageName = `${fileName}.jpg`;
+      const subtitleName = `${fileName}.srt`;
       const obj = {
         parent: parentFolder,
         genre: gender,
         name: fileName,
+        subtitles: `${publicUrl}/${uri.serialize(
+          uri.parse(path.join(dirPath, '/', subtitleName).replace(`${publicFolder}/`, ''))
+        )}`,
         video: `${publicUrl}/${uri.serialize(
           uri.parse(path.join(dirPath, '/', file).replace(`${publicFolder}/`, ''))
         )}`,

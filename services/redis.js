@@ -18,7 +18,6 @@ class Redis {
 
   keys(value) {
     const this1 = this;
-    log(`Find keys: ${value}`);
     return new Promise((resolve, reject) => {
       this1.redisClient.keys(`${value}`, (err, result) => {
         if (err) {
@@ -54,6 +53,20 @@ class Redis {
           return reject();
         }
         return resolve(data);
+      });
+    });
+  }
+
+  getParsed(key) {
+    log(`Get key: ${key}`);
+    return new Promise((resolve, reject) => {
+      this.redisClient.get(`${key}`, (err, data) => {
+        if (err) {
+          log(`Get error for key: ${key}`);
+          // eslint-disable-next-line prefer-promise-reject-errors
+          return reject();
+        }
+        return resolve(JSON.parse(data));
       });
     });
   }

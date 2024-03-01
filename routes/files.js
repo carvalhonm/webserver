@@ -17,11 +17,11 @@ const router = express.Router();
 router.all('/categories', (req, res, next) => {
   const redis = new Redis();
   return redis
-    .keys('*')
+    .keys('*:*')
     .then((data) => {
       const response = {};
       data.forEach((value) => {
-        const keys = value.split(':')[0];
+        const keys = value.split(':')[1];
         response[keys] = keys;
       });
       res.status(200).json(response);
@@ -29,12 +29,6 @@ router.all('/categories', (req, res, next) => {
     .catch(() => res.status(204).json({ status: 'No Content' }));
 });
 
-/* router.all('/:id/:file', (req, res, next) => {
-  if (data[req.params.id] !== undefined && data[req.params.id]) {
-    return res.status(200).json(data[req.params.id]);
-  }
-  return res.status(204).json({ status: 'No Content' });
-}); */
 router.all('/categories/:id', async (req, res, next) => {
   log(req.params.id);
   /* if (data[req.params.id] !== undefined) {
@@ -57,12 +51,38 @@ router.all('/categories/:id', async (req, res, next) => {
 
   // eslint-disable-next-line no-restricted-syntax
   for (const key of keys) {
-    const record = await redis.get(key);
-    response.push(JSON.parse(record));
+    response.push(redis.getParsed(key));
   }
-  return res.status(200).json(response);
+  return res.status(200).json(await Promise.all(response));
 });
 
-// router.all('/', (_req, res) => res.status(200).json(sampleData));
+router.all('/categories/:id/:subid', async (req, res, next) => {
+  log(req.params.id);
+  log(req.params.subid);
+  /* if (data[req.params.id] !== undefined) {
+    return res.status(200).json(data[req.params.id]);
+  } */
+  const redis = new Redis();
+  const data = await redis.keys(`${req.params.id}*${req.params.subid}*`);
+  // log(data);
+  // .then((data) => {
+  if (data.length === 0) {
+    return res.status(204).json({ status: 'No Content' });
+  }
+  const response = [];
+  const keys = [];
+  data.forEach((value) => {
+    keys.push(value);
+  });
+  if (keys.length === 0) {
+    return res.status(204).json({ status: 'No Content' });
+  }
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const key of keys) {
+    response.push(redis.getParsed(key));
+  }
+  return res.status(200).json(await Promise.all(response));
+});
 
 module.exports = router;

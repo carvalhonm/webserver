@@ -1,20 +1,6 @@
 version: "3"
 
 services:
-  api:
-    build: .
-    volumes:
-      - .:/app
-      - ${SCAN_PATH}:/app/${PUBLIC_FOLDER}
-    env_file:
-      - .env
-    ports:
-      - ${APP_PORT}:${APP_PORT}
-      - ${PUBLIC_PORT}:${PUBLIC_PORT}
-    depends_on:
-      - redis
-    command: sh -c 'npm install nodemon -g && npm i && nodemon start'
-
   redis:
     image: redis:alpine
     ports:

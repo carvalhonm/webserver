@@ -9,6 +9,7 @@ const cors = require('cors');
 
 const tests = require('./routes/tests');
 const fileList = require('./routes/files');
+const foldersList = require('./routes/folders');
 const fileCheck = require('./routes/file-check');
 
 const app = express();
@@ -21,7 +22,6 @@ app.use(express.urlencoded({ extended: false }));
 publicApp.use(express.static(process.env.PUBLIC_FOLDER));
 
 app.use((req, res, next) => {
-  // log(req);
   log(`Method: ${req.method}\noriginalUrl: ${req.originalUrl}\nPath: ${req.path}`);
   if (!req.headers.authorization || req.headers.authorization !== process.env.ADMIN_KEY) {
     log('No authorization send');
@@ -32,6 +32,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/v1/test', tests);
+app.use('/api/v1/list-folders', foldersList);
 app.use('/api/v1/list-files', fileList);
 app.use('/api/v1/file-check', fileCheck);
 

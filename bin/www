@@ -6,7 +6,10 @@ require('dotenv').config();
  * Module dependencies.
  */
 
-const http = require('http');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
 const { app, publicApp } = require('../app');
 
 /**
@@ -91,8 +94,19 @@ function onErrorPublic(error) {
  * Create HTTP server.
  */
 
-const serverApp = http.createServer(app);
-const serverPublic = http.createServer(publicApp);
+var privateKey = fs.readFileSync(path.join(__dirname, '..', 'certs', 'privkey.pem'));
+var certificate = fs.readFileSync(path.join(__dirname, '..', 'certs', 'fullchain.pem'));
+
+const serverApp = https.createServer({
+    key: privateKey,
+    cert: certificate
+}, app);
+
+
+const serverPublic = https.createServer({
+    key: privateKey,
+    cert: certificate
+}, app);
 
 /**
  * Listen on provided port, on all network interfaces.

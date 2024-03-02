@@ -94,19 +94,24 @@ function onErrorPublic(error) {
  * Create HTTP server.
  */
 
-var privateKey = fs.readFileSync(path.join(__dirname, '..', 'certs', 'privkey.pem'));
-var certificate = fs.readFileSync(path.join(__dirname, '..', 'certs', 'fullchain.pem'));
+const privateKey = fs.readFileSync(path.join(__dirname, '..', 'certs', 'privkey.pem'));
+const certificate = fs.readFileSync(path.join(__dirname, '..', 'certs', 'fullchain.pem'));
 
-const serverApp = https.createServer({
+const serverApp = https.createServer(
+  {
     key: privateKey,
-    cert: certificate
-}, app);
+    cert: certificate,
+  },
+  app
+);
 
-
-const serverPublic = https.createServer({
+const serverPublic = https.createServer(
+  {
     key: privateKey,
-    cert: certificate
-}, app);
+    cert: certificate,
+  },
+  publicApp
+);
 
 /**
  * Listen on provided port, on all network interfaces.

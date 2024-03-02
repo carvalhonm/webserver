@@ -94,8 +94,11 @@ function onErrorPublic(error) {
  * Create HTTP server.
  */
 
-const privateKey = fs.readFileSync(path.join(__dirname, '..', 'certs', 'privkey.pem'));
-const certificate = fs.readFileSync(path.join(__dirname, '..', 'certs', 'fullchain.pem'));
+const URL = require('url');
+const myDomain = URL.parse(process.env.PUBLIC_URL)
+
+const privateKey = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/privkey.pem`);
+const certificate = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/fullchain.pem`);
 
 const serverApp = https.createServer(
   {

@@ -10,7 +10,7 @@ const Redis = require('../services/redis');
 const router = express.Router();
 
 const publicFolder = process.env.PUBLIC_FOLDER;
-const publicUrl = `${process.env.PUBLIC_URL}:${process.env.PUBLIC_PORT}`;
+const publicUrl = `${process.env.PUBLIC_URL}:${process.env.SECURE_PUBLIC_PORT}`;
 
 const allowTypes = ['mp4', 'mkv', 'm4v'];
 

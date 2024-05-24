@@ -7,10 +7,11 @@ require('dotenv').config();
  */
 
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
-const path = require('path');
 
-const { app, publicApp } = require('../app');
+const URL = require('url');
+const { app, publicApp, unsecurePublicApp } = require('../app');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -36,11 +37,13 @@ function normalizePort(val) {
  * Get port from environment and store in Express.
  */
 
-const adminPort = normalizePort(process.env.APP_PORT || '3000');
-const publicPort = normalizePort(process.env.PUBLIC_PORT || '3001');
+const adminPort = normalizePort(process.env.SECURE_APP_PORT || '3000');
+const publicPort = normalizePort(process.env.SECURE_PUBLIC_PORT || '3001');
+const unsecurePublicPort = normalizePort(process.env.PUBLIC_PORT || '80');
 
 app.set('port', adminPort);
 publicApp.set('port', publicPort);
+unsecurePublicApp.set('port', unsecurePublicPort);
 
 /**
  * Event listener for HTTP server "error" event.
@@ -90,12 +93,33 @@ function onErrorPublic(error) {
   }
 }
 
+function onErrorUnsecurePublic(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string' ? `Pipe ${unsecurePublicPort}` : `Port ${unsecurePublicPort}`;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
 /**
- * Create HTTP server.
+ * Create HTTPS server.
  */
 
-const URL = require('url');
-const myDomain = URL.parse(process.env.PUBLIC_URL)
+const myDomain = URL.parse(process.env.PUBLIC_URL);
 
 const privateKey = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/privkey.pem`);
 const certificate = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/fullchain.pem`);
@@ -117,6 +141,12 @@ const serverPublic = https.createServer(
 );
 
 /**
+ * Create HTTP server.
+ */
+
+const unsecureServerPublic = http.createServer(unsecurePublicApp);
+
+/**
  * Listen on provided port, on all network interfaces.
  */
 
@@ -125,3 +155,6 @@ serverApp.on('error', onErrorAdmin);
 
 serverPublic.listen(publicPort);
 serverPublic.on('error', onErrorPublic);
+
+unsecureServerPublic.listen(unsecurePublicPort);
+unsecureServerPublic.on('error', onErrorUnsecurePublic);

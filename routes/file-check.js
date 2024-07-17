@@ -1,7 +1,6 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const exec = require('child_process');
 const uri = require('uri-js');
 const log = require('../services/log');
 const Redis = require('../services/redis');

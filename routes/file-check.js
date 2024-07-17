@@ -1,5 +1,4 @@
 const express = require('express');
-
 const fs = require('fs');
 const path = require('path');
 const exec = require('child_process');
@@ -11,7 +10,6 @@ const router = express.Router();
 
 const publicFolder = process.env.PUBLIC_FOLDER;
 const publicUrl = `${process.env.PUBLIC_URL}:${process.env.PUBLIC_PORT}`;
-
 const allowTypes = ['mp4', 'mkv', 'm4v'];
 
 const redis = new Redis();
@@ -23,7 +21,6 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
   try {
     files = fs.readdirSync(dirPath);
   } catch (_err) {
-    // Handling single file case
     if (allowTypes.includes(dirPath.split('.').slice(-1).pop())) {
       const stats = fs.statSync(dirPath);
       const fileName = path.basename(dirPath, path.extname(dirPath));
@@ -70,10 +67,7 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
   return arrayOfFiles;
 };
 
-const getLatestFiles = (files, limit = 10) =>
-  files.sort((a, b) => new Date(b.mtime) - new Date(a.mtime)).slice(0, limit);
-
-const updateRedis = (files) => {
+const updateRedis = (files, keyPrefix) => {
   if (!Array.isArray(files)) {
     log('File in parent directory, ignoring for now');
     return;
@@ -87,24 +81,47 @@ const updateRedis = (files) => {
       file.parent = 'all';
     }
     index = `${file.parent.replace(/(&|\(|\)|'|")/g, '')}:${file.genre.replace(/(&|\(|\)|'|")/g, '')}:${index}`;
-    redis.set(index, JSON.stringify(file));
+    redis.set(`${keyPrefix}:${index}`, JSON.stringify(file));
   });
 };
+
+const categories = ['Filmes', 'Series', 'Ginastica', 'Pai Mae'];
 
 log('Start SERVICE File Analysis');
 const parentFolders = fs.readdirSync(publicFolder);
 
-let allFiles = [];
-parentFolders.forEach((folder) => {
-  log(`Processing Folder ${folder}`);
-  const files = getAllFiles(path.join(publicFolder, folder), [], '', 0, folder);
-  updateRedis(files); // Atualiza o Redis com todos os ficheiros
-  allFiles = allFiles.concat(files); // Adiciona à lista completa de ficheiros
-  log(`Finished Processing Folder ${folder}`);
+categories.forEach((category) => {
+  const allFiles = [];
+  parentFolders.forEach((folder) => {
+    if (folder === category) {
+      log(`Processing Category Folder ${folder}`);
+      const files = getAllFiles(path.join(publicFolder, folder), [], '', 0, folder);
+      updateRedis(files, folder); // Atualiza o Redis com todos os ficheiros desta categoria
+      allFiles.push(...files); // Adiciona à lista completa de ficheiros da categoria
+      log(`Finished Processing Folder ${folder}`);
+    }
+  });
+
+  const getLatestFiles = (files, limit = 10) =>
+    files.sort((a, b) => new Date(b.mtime) - new Date(a.mtime)).slice(0, limit);
+
+  // Selecionar os 10 ficheiros mais recentes para esta categoria
+  const latestFiles = getLatestFiles(allFiles, 10);
+  redis.set(`latest_${category.toLowerCase()}`, JSON.stringify(latestFiles));
 });
 
-// Selecionar os 10 ficheiros mais recentes
-const latestFiles = getLatestFiles(allFiles, 10);
-redis.set('latest', JSON.stringify(latestFiles));
+router.get('/latest/:category', async (req, res) => {
+  try {
+    const category = req.params.category;
+    const latestFiles = await redis.get(`latest_${category.toLowerCase()}`);
+    if (latestFiles) {
+      res.status(200).json(JSON.parse(latestFiles));
+    } else {
+      res.status(404).json({ error: 'No latest files found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

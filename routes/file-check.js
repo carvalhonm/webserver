@@ -28,6 +28,7 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
       const fileName = dirPath.replace(`${publicFolder}/`, '').split('.').slice(0, -1).join('.');
       const imageName = `${dirPath}.jpg`;
       const subtitleName = `${dirPath}.srt`;
+      const stats = fs.statSync(dirPath);
       const obj = {
         parent: 'all',
         genre: parentFolder,
@@ -35,6 +36,7 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
         subtitles: `${publicUrl}/${uri.serialize(uri.parse(subtitleName.replace(`${publicFolder}/`, '')))}`,
         video: `${publicUrl}/${uri.serialize(uri.parse(dirPath.replace(`${publicFolder}/`, '')))}`,
         thumb: `${publicUrl}/${uri.serialize(uri.parse(imageName.replace(`${publicFolder}/`, '')))}`,
+        mtime: stats.mtime,
       };
       try {
         if (!fs.existsSync(dirPath)) {
@@ -64,6 +66,7 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
       const fileName = file.split('.').slice(0, -1).join('.');
       const imageName = `${fileName}.jpg`;
       const subtitleName = `${fileName}.srt`;
+      const stats = fs.statSync(filePath);
       const obj = {
         parent: parentFolder,
         genre: gender,
@@ -77,6 +80,7 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
         thumb: `${publicUrl}/${uri.serialize(
           uri.parse(path.join(dirPath, '/', imageName).replace(`${publicFolder}/`, ''))
         )}`,
+        mtime: stats.mtime,
       };
       arrayOfFiles.push(obj);
 
@@ -98,6 +102,9 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
   return arrayOfFiles;
 };
 
+const getLatestFiles = (files, limit = 10) =>
+  files.sort((a, b) => new Date(b.mtime) - new Date(a.mtime)).slice(0, limit);
+
 const updateRedis = (files) => {
   if (!Array.isArray(files)) {
     log('File in parent directory, ignoring for now');
@@ -116,28 +123,20 @@ const updateRedis = (files) => {
   });
 };
 
-/* router.get('', (_req, res) => {
-  const parentFolders = fs.readdirSync(publicFolder);
-
-  const fullFiles = [];
-  parentFolders.forEach((folder) => {
-    const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
-    updateRedis(files);
-    fullFiles.push(files);
-  });
-  res.status(200).json(fullFiles);
-}); */
-
 log('Start SERVICE File Analisys');
 const parentFolders = fs.readdirSync(publicFolder);
 
-const fullFiles = [];
+const allFiles = [];
 parentFolders.forEach((folder) => {
   log(`Processing Folder ${folder}`);
   const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
   updateRedis(files);
-  fullFiles.push(files);
+  allFiles.push(files);
   log(`Finnish Processing Folder ${folder}`);
 });
+
+// Selecionar os 10 ficheiros mais recentes
+const latestFiles = getLatestFiles(allFiles, 10);
+redis.set('latest', JSON.stringify(latestFiles));
 
 module.exports = router;

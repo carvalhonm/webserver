@@ -23,80 +23,48 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
   try {
     files = fs.readdirSync(dirPath);
   } catch (_err) {
+    // Handling single file case
     if (allowTypes.includes(dirPath.split('.').slice(-1).pop())) {
-      log('File in parent directory, ignoring for now, kind of');
-      const fileName = dirPath.replace(`${publicFolder}/`, '').split('.').slice(0, -1).join('.');
-      const imageName = `${dirPath}.jpg`;
-      const subtitleName = `${dirPath}.srt`;
       const stats = fs.statSync(dirPath);
+      const fileName = path.basename(dirPath, path.extname(dirPath));
       const obj = {
         parent: 'all',
         genre: parentFolder,
         name: fileName,
-        subtitles: `${publicUrl}/${uri.serialize(uri.parse(subtitleName.replace(`${publicFolder}/`, '')))}`,
+        subtitles: `${publicUrl}/${uri.serialize(uri.parse(`${fileName}.srt`.replace(`${publicFolder}/`, '')))}`,
         video: `${publicUrl}/${uri.serialize(uri.parse(dirPath.replace(`${publicFolder}/`, '')))}`,
-        thumb: `${publicUrl}/${uri.serialize(uri.parse(imageName.replace(`${publicFolder}/`, '')))}`,
+        thumb: `${publicUrl}/${uri.serialize(uri.parse(`${fileName}.jpg`.replace(`${publicFolder}/`, '')))}`,
         mtime: stats.mtime,
       };
-      try {
-        if (!fs.existsSync(dirPath)) {
-          exec.execSync(
-            `ffmpeg -loglevel quiet -ss 0:02:00 -n -i ${dirPath.replace(
-              /(?=[&() ])/g,
-              '\\'
-            )} -frames:v 1 -q:v 2 ${dirPath.replace(/(?=[&() ])/g, '\\')}`
-          );
-        }
-      } catch (e) {
-        log(`Unable to process image for [${imageName}] with error [${e}]`);
-      }
       return [obj];
     }
     return [];
   }
 
   files.forEach((file) => {
-    const filePath = `${dirPath}/${file}`;
+    const filePath = path.join(dirPath, file);
     if (fs.statSync(filePath).isDirectory()) {
       if (filePath.split('/').length === parentFolderSize + 2) {
         gender = file;
       }
       arrayOfFiles = getAllFiles(filePath, arrayOfFiles, gender, level, parentFolder);
     } else if (allowTypes.includes(file.split('.').slice(-1).pop())) {
-      const fileName = file.split('.').slice(0, -1).join('.');
-      const imageName = `${fileName}.jpg`;
-      const subtitleName = `${fileName}.srt`;
       const stats = fs.statSync(filePath);
+      const fileName = path.basename(file, path.extname(file));
       const obj = {
         parent: parentFolder,
         genre: gender,
         name: fileName,
         subtitles: `${publicUrl}/${uri.serialize(
-          uri.parse(path.join(dirPath, '/', subtitleName).replace(`${publicFolder}/`, ''))
+          uri.parse(path.join(dirPath, `${fileName}.srt`).replace(`${publicFolder}/`, ''))
         )}`,
-        video: `${publicUrl}/${uri.serialize(
-          uri.parse(path.join(dirPath, '/', file).replace(`${publicFolder}/`, ''))
-        )}`,
+        video: `${publicUrl}/${uri.serialize(uri.parse(filePath.replace(`${publicFolder}/`, '')))}`,
         thumb: `${publicUrl}/${uri.serialize(
-          uri.parse(path.join(dirPath, '/', imageName).replace(`${publicFolder}/`, ''))
+          uri.parse(path.join(dirPath, `${fileName}.jpg`).replace(`${publicFolder}/`, ''))
         )}`,
         mtime: stats.mtime,
       };
       arrayOfFiles.push(obj);
-
-      try {
-        if (!fs.existsSync(`${path.join(dirPath, '/', imageName)}`)) {
-          exec.execSync(
-            `ffmpeg -loglevel quiet -ss 0:02:00 -n -i ${path
-              .join(dirPath, '/', file)
-              .replace(/(?=[&() ])/g, '\\')} -frames:v 1 -q:v 2 ${path
-              .join(dirPath, '/', imageName)
-              .replace(/(?=[&() ])/g, '\\')}`
-          );
-        }
-      } catch (e) {
-        log(`Unable to process image for [${imageName}] with error [${e}]`);
-      }
     }
   });
   return arrayOfFiles;
@@ -123,16 +91,16 @@ const updateRedis = (files) => {
   });
 };
 
-log('Start SERVICE File Analisys');
+log('Start SERVICE File Analysis');
 const parentFolders = fs.readdirSync(publicFolder);
 
-const allFiles = [];
+let allFiles = [];
 parentFolders.forEach((folder) => {
   log(`Processing Folder ${folder}`);
-  const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
-  updateRedis(files);
-  allFiles.push(files);
-  log(`Finnish Processing Folder ${folder}`);
+  const files = getAllFiles(path.join(publicFolder, folder), [], '', 0, folder);
+  updateRedis(files); // Atualiza o Redis com todos os ficheiros
+  allFiles = allFiles.concat(files); // Adiciona à lista completa de ficheiros
+  log(`Finished Processing Folder ${folder}`);
 });
 
 // Selecionar os 10 ficheiros mais recentes

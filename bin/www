@@ -7,10 +7,11 @@ require('dotenv').config();
  */
 
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const { app, publicApp } = require('../app');
+const { app, publicApp, certBot } = require('../app');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -38,9 +39,11 @@ function normalizePort(val) {
 
 const adminPort = normalizePort(process.env.APP_PORT || '3000');
 const publicPort = normalizePort(process.env.PUBLIC_PORT || '3001');
+const certBotPort = normalizePort(process.env.CERTBOT_PORT || '3002');
 
 app.set('port', adminPort);
 publicApp.set('port', publicPort);
+certBot.set('port', certBotPort);
 
 /**
  * Event listener for HTTP server "error" event.
@@ -116,6 +119,8 @@ const serverPublic = https.createServer(
   publicApp
 );
 
+const serverCertBot = http.createServer(certBot);
+
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -124,4 +129,7 @@ serverApp.listen(adminPort);
 serverApp.on('error', onErrorAdmin);
 
 serverPublic.listen(publicPort);
+serverPublic.on('error', onErrorPublic);
+
+serverCertBot.listen(certBotPort);
 serverPublic.on('error', onErrorPublic);

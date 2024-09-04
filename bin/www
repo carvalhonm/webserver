@@ -9,8 +9,8 @@ require('dotenv').config();
 const https = require('https');
 const http = require('http');
 const fs = require('fs');
-const path = require('path');
 
+const URL = require('url');
 const { app, publicApp, certBot } = require('../app');
 
 /**
@@ -97,11 +97,17 @@ function onErrorPublic(error) {
  * Create HTTP server.
  */
 
-const URL = require('url');
-const myDomain = URL.parse(process.env.PUBLIC_URL)
+const myDomain = URL.parse(process.env.PUBLIC_URL);
 
-const privateKey = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/privkey.pem`);
-const certificate = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/fullchain.pem`);
+let privateKey = '';
+let certificate = '';
+if (process.env.NODE_ENV === 'production') {
+  privateKey = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/privkey.pem`);
+  certificate = fs.readFileSync(`/etc/letsencrypt/live/${myDomain.host}/fullchain.pem`);
+} else {
+  privateKey = fs.readFileSync('./dev-certs/dev-privkey.pem');
+  certificate = fs.readFileSync('./dev-certs/dev-cert.pem');
+}
 
 const serverApp = https.createServer(
   {

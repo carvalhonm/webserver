@@ -17,6 +17,21 @@ const allowTypes = ['mp4', 'mkv', 'm4v'];
 const redis = new Redis();
 redis.flushDb();
 
+const formatSeconds = (seconds) => {
+  // Converte os segundos em horas, minutos e segundos
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  // Formata horas, minutos e segundos
+  const formattedHours = hours > 0 ? `${hours}:` : '';
+  const formattedMinutes = minutes.toString().padStart(2, '0');
+  const formattedSeconds = secs.toString().padStart(2, '0');
+
+  // Retorna a string no formato desejado
+  return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
+};
+
 const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
   const parentFolderSize = publicFolder.split('/').length;
   let files;
@@ -38,8 +53,15 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
       };
       try {
         if (!fs.existsSync(dirPath)) {
+          const fileStats = exec.execSync(
+            `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${dirPath}"`
+          );
+          let duration = '0:02:00';
+          if (fileStats.toString() < 120) {
+            duration = formatSeconds(fileStats.toString() / 2);
+          }
           exec.execSync(
-            `ffmpeg -loglevel quiet -ss 0:02:00 -n -i ${dirPath.replace(
+            `ffmpeg -loglevel quiet -ss ${duration} -n -i ${dirPath.replace(
               /(?=[&() ])/g,
               '\\'
             )} -frames:v 1 -q:v 2 ${dirPath.replace(/(?=[&() ])/g, '\\')}`
@@ -82,8 +104,19 @@ const getAllFiles = (dirPath, arrayOfFiles, gender, level, parentFolder) => {
 
       try {
         if (!fs.existsSync(`${path.join(dirPath, '/', imageName)}`)) {
+          const fileStats = exec.execSync(
+            `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${path.join(
+              dirPath,
+              '/',
+              file
+            )}"`
+          );
+          let duration = '0:02:00';
+          if (fileStats.toString() < 120) {
+            duration = formatSeconds(fileStats.toString() / 2);
+          }
           exec.execSync(
-            `ffmpeg -loglevel quiet -ss 0:02:00 -n -i ${path
+            `ffmpeg -loglevel quiet -ss ${duration} -n -i ${path
               .join(dirPath, '/', file)
               .replace(/(?=[&() ])/g, '\\')} -frames:v 1 -q:v 2 ${path
               .join(dirPath, '/', imageName)

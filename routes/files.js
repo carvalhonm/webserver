@@ -14,7 +14,7 @@ const router = express.Router();
  *
  * @apiSuccess {String} All User Template
  */
-router.all('/categories', (req, res, next) => {
+router.all('/categories', (req, res) => {
   const redis = new Redis();
   return redis
     .keys('*:*')
@@ -29,7 +29,7 @@ router.all('/categories', (req, res, next) => {
     .catch(() => res.status(204).json({ status: 'No Content' }));
 });
 
-router.all('/categories/:id', async (req, res, next) => {
+router.all('/categories/:id', async (req, res) => {
   log(req.params.id);
   /* if (data[req.params.id] !== undefined) {
     return res.status(200).json(data[req.params.id]);
@@ -56,7 +56,7 @@ router.all('/categories/:id', async (req, res, next) => {
   return res.status(200).json(await Promise.all(response));
 });
 
-router.all('/categories/:id/:subid', async (req, res, next) => {
+router.all('/categories/:id/:subid', async (req, res) => {
   log(req.params.id);
   log(req.params.subid);
   /* if (data[req.params.id] !== undefined) {

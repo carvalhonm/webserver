@@ -35,7 +35,6 @@ app.use((req, res, next) => {
   return next();
 });
 
-app.use('/api/v1/test', tests);
 app.use('/api/v1/list-folders', foldersList);
 app.use('/api/v1/list-files', fileList);
 app.use('/api/v1/file-check', fileCheck);

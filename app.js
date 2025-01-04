@@ -23,7 +23,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 publicApp.use(express.static(process.env.PUBLIC_FOLDER));
 
-certBot.use('/.well-known/acme-challenge', express.static('static/.well-known/acme-challenge'));
+//certBot.use('/.well-known/acme-challenge', express.static('static/.well-known/acme-challenge'));
+certBot.use('/.well-known/acme-challenge', express.static('/opt/serverrpi/static/.well-known/acme-challenge'));
 
 app.use((req, res, next) => {
   log(`Method: ${req.method}\noriginalUrl: ${req.originalUrl}\nPath: ${req.path}`);

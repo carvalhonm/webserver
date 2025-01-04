@@ -137,5 +137,7 @@ serverApp.on('error', onErrorAdmin);
 serverPublic.listen(publicPort);
 serverPublic.on('error', onErrorPublic);
 
-serverCertBot.listen(certBotPort);
+serverCertBot.listen(certBotPort, () => {
+  console.log(`Servidor CertBot está ok na porta ${certBot.get('port')}`);
+});
 serverPublic.on('error', onErrorPublic);

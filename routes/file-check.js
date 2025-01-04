@@ -193,8 +193,6 @@ init();
 router.get('', (_req, res) => {
   init();
   res.status(200).json({ status: 'ok' });
-
 });
-
 
 module.exports = router;

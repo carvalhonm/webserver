@@ -165,25 +165,34 @@ const updateRedis = (files) => {
   });
 };
 
-log('Start SERVICE File Analisys');
-const parentFolders = fs.readdirSync(publicFolder);
+const init = () => {
+  const parentFolders = fs.readdirSync(publicFolder);
 
-parentFolders.forEach((folder) => {
-  log(`Processing Folder ${folder}`);
-  const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
-  updateRedis(files);
-  log(`Finnish Processing Folder ${folder}`);
-});
+  parentFolders.forEach((folder) => {
+    log(`Processing Folder ${folder}`);
+    const files = getAllFiles(`${publicFolder}/${folder}`, [], '', 0, folder);
+    updateRedis(files);
+    log(`Finnish Processing Folder ${folder}`);
+  });
 
-const sortedFiles = lastInserted.sort((a, b) => b.mtime - a.mtime);
-const topLastInserted = sortedFiles.slice(0, maxLastInserted);
-const topFiles = [];
-topLastInserted.forEach((file) => {
-  log(`Processing Last Inserted ${file}`);
-  file.fileData.parent = `${maxLastInserted} Mais Recentes`;
-  topFiles.push(file.fileData);
-  log(`Processing Last Inserted`);
+  const sortedFiles = lastInserted.sort((a, b) => b.mtime - a.mtime);
+  const topLastInserted = sortedFiles.slice(0, maxLastInserted);
+  const topFiles = [];
+  topLastInserted.forEach((file) => {
+    log(`Processing Last Inserted ${file}`);
+    file.fileData.parent = `${maxLastInserted} Mais Recentes`;
+    topFiles.push(file.fileData);
+    log(`Processing Last Inserted`);
+  });
+  updateRedis(topFiles);
+};
+
+log('Start SERVICE File Analyzer');
+init();
+
+router.get('', (_req, res) => {
+  init();
+  res.status(200).json({ status: 'ok' });
 });
-updateRedis(topFiles);
 
 module.exports = router;

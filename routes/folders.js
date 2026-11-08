@@ -6,15 +6,13 @@ const Redis = require('../services/redis');
 const router = express.Router();
 
 /**
- * @api {get} /templates Request Template information
- * @apiName GetTemplate
- * @apiGroup Template
+ * @api {get} /folders Request folders information
+ * @apiName Folders
+ * @apiGroup Folders
  *
- * @apiParam {String} id User Api Key unique Key.
- *
- * @apiSuccess {String} All User Template
+ * @apiSuccess {String} All Folders
  */
-router.all('/folders', (req, res) => {
+router.get('/folders', (req, res) => {
   const redis = new Redis();
   return redis
     .keys('*')
@@ -29,13 +27,14 @@ router.all('/folders', (req, res) => {
     .catch(() => res.status(204).json({ status: 'No Content' }));
 });
 
-/* router.all('/:id/:file', (req, res, next) => {
-  if (data[req.params.id] !== undefined && data[req.params.id]) {
-    return res.status(200).json(data[req.params.id]);
-  }
-  return res.status(204).json({ status: 'No Content' });
-}); */
-router.all('/folders/:id', async (req, res) => {
+/**
+ * @api {get} /folders/:id Request folders information
+ * @apiName Folders
+ * @apiGroup Folders
+ *
+ * @apiSuccess {String} All Folders
+ */
+router.get('/folders/:id', async (req, res) => {
   log(req.params.id);
 
   const redis = new Redis();
@@ -52,7 +51,5 @@ router.all('/folders/:id', async (req, res) => {
   });
   return setTimeout(() => res.status(200).json(Array.from(response)), 0);
 });
-
-// router.all('/', (_req, res) => res.status(200).json(sampleData));
 
 module.exports = router;

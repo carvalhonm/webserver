@@ -31,12 +31,9 @@ router.all('/categories', (req, res) => {
 
 router.all('/categories/:id', async (req, res) => {
   log(req.params.id);
-  /* if (data[req.params.id] !== undefined) {
-    return res.status(200).json(data[req.params.id]);
-  } */
+
   const redis = new Redis();
   const data = await redis.keys(`${req.params.id}*`);
-  // .then((data) => {
   if (data.length === 0) {
     return res.status(204).json({ status: 'No Content' });
   }
@@ -59,13 +56,9 @@ router.all('/categories/:id', async (req, res) => {
 router.all('/categories/:id/:subid', async (req, res) => {
   log(req.params.id);
   log(req.params.subid);
-  /* if (data[req.params.id] !== undefined) {
-    return res.status(200).json(data[req.params.id]);
-  } */
+
   const redis = new Redis();
   const data = await redis.keys(`${req.params.id}*${req.params.subid}*`);
-  // log(data);
-  // .then((data) => {
   if (data.length === 0) {
     return res.status(204).json({ status: 'No Content' });
   }

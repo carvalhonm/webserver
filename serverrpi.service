@@ -1,10 +1,12 @@
 [Unit]
-Description=ServicesServer
-After=media-nuno-4C42\x2d5F9B.mount
+Description=ServicesServer (webserver)
+After=network-online.target
+Wants=network-online.target
+RequiresMountsFor=/media/nuno/4C42-5F9B
 
 [Service]
+WorkingDirectory=/opt/serverrpi
 ExecStart=/usr/bin/node /opt/serverrpi/bin/www
-Restart=always
 EnvironmentFile=/opt/serverrpi/.env
 Restart=always
 RestartSec=10
@@ -12,3 +14,4 @@ RestartSec=10
 [Install]
 WantedBy=multi-user.target
 Alias=services-server.service
+

@@ -23,6 +23,12 @@ app.use(express.urlencoded({ extended: false }));
 publicApp.use(express.static(process.env.PUBLIC_FOLDER));
 
 // certBot.use('/.well-known/acme-challenge', express.static('static/.well-known/acme-challenge'));
+certBot.use('/capy', express.static('/opt/serverrpi/static/capy', {
+  setHeaders: (res, filePath) => {
+    // Vite hashes the JS, so only index.html must not be cached.
+    if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
+  },
+}));
 certBot.use('/.well-known/acme-challenge', express.static('/opt/serverrpi/static/.well-known/acme-challenge'));
 
 app.use((req, res, next) => {

@@ -7,11 +7,10 @@ require('dotenv').config();
  */
 
 const https = require('https');
-const http = require('http');
 const fs = require('fs');
 
 const URL = require('url');
-const { app, publicApp, certBot } = require('../app');
+const { app, publicApp } = require('../app');
 
 /**
  * Normalize a port into a number, string, or false.
@@ -39,62 +38,40 @@ function normalizePort(val) {
 
 const adminPort = normalizePort(process.env.APP_PORT || '3000');
 const publicPort = normalizePort(process.env.PUBLIC_PORT || '3001');
-const certBotPort = normalizePort(process.env.CERTBOT_PORT || '3002');
 
 app.set('port', adminPort);
 publicApp.set('port', publicPort);
-certBot.set('port', certBotPort);
 
 /**
  * Event listener for HTTP server "error" event.
  */
 
-function onErrorAdmin(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
-
-  const bind = typeof port === 'string' ? `Pipe ${adminPort}` : `Port ${adminPort}`;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(`${bind} requires elevated privileges`);
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(`${bind} is already in use`);
-      process.exit(1);
-      break;
-    default:
+function onError(port) {
+  return (error) => {
+    if (error.syscall !== 'listen') {
       throw error;
-  }
-}
+    }
 
-function onErrorPublic(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+    const bind = typeof port === 'string' ? `Pipe ${port}` : `Port ${port}`;
 
-  const bind = typeof port === 'string' ? `Pipe ${publicPort}` : `Port ${publicPort}`;
-
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(`${bind} requires elevated privileges`);
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(`${bind} is already in use`);
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+    // handle specific listen errors with friendly messages
+    switch (error.code) {
+      case 'EACCES':
+        console.error(`${bind} requires elevated privileges`);
+        process.exit(1);
+        break;
+      case 'EADDRINUSE':
+        console.error(`${bind} is already in use`);
+        process.exit(1);
+        break;
+      default:
+        throw error;
+    }
+  };
 }
 
 /**
- * Create HTTP server.
+ * Create HTTPS servers.
  */
 
 const myDomain = URL.parse(process.env.PUBLIC_URL);
@@ -109,35 +86,17 @@ if (process.env.NODE_ENV === 'production') {
   certificate = fs.readFileSync('./dev-certs/dev-cert.pem');
 }
 
-const serverApp = https.createServer(
-  {
-    key: privateKey,
-    cert: certificate,
-  },
-  app
-);
+const tls = { key: privateKey, cert: certificate };
 
-const serverPublic = https.createServer(
-  {
-    key: privateKey,
-    cert: certificate,
-  },
-  publicApp
-);
-
-const serverCertBot = http.createServer(certBot);
+const serverApp = https.createServer(tls, app);
+const serverPublic = https.createServer(tls, publicApp);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-serverApp.listen(adminPort);
-serverApp.on('error', onErrorAdmin);
+serverApp.listen(adminPort, () => console.log(`API listening on :${adminPort}`));
+serverApp.on('error', onError(adminPort));
 
-serverPublic.listen(publicPort);
-serverPublic.on('error', onErrorPublic);
-
-serverCertBot.listen(certBotPort, () => {
-  console.log(`Servidor CertBot está ok na porta ${certBot.get('port')}`);
-});
-serverPublic.on('error', onErrorPublic);
+serverPublic.listen(publicPort, () => console.log(`Media listening on :${publicPort}`));
+serverPublic.on('error', onError(publicPort));

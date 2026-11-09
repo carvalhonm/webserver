@@ -1,8 +1,4 @@
 require('dotenv').config();
-// const path = require('path')
-// require('dotenv').config({ path: path.resolve(__dirname, './.env') })
-
-console.log(process.env);
 
 const express = require('express');
 const cors = require('cors');
@@ -13,7 +9,6 @@ const fileCheck = require('./routes/file-check');
 
 const app = express();
 const publicApp = express();
-const certBot = express();
 
 const log = require('./services/log');
 
@@ -21,15 +16,6 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 publicApp.use(express.static(process.env.PUBLIC_FOLDER));
-
-// certBot.use('/.well-known/acme-challenge', express.static('static/.well-known/acme-challenge'));
-certBot.use('/capy', express.static('/opt/serverrpi/static/capy', {
-  setHeaders: (res, filePath) => {
-    // Vite hashes the JS, so only index.html must not be cached.
-    if (filePath.endsWith('index.html')) res.setHeader('Cache-Control', 'no-cache');
-  },
-}));
-certBot.use('/.well-known/acme-challenge', express.static('/opt/serverrpi/static/.well-known/acme-challenge'));
 
 app.use((req, res, next) => {
   log(`Method: ${req.method}\noriginalUrl: ${req.originalUrl}\nPath: ${req.path}`);
@@ -48,5 +34,4 @@ app.use('/api/v1/file-check', fileCheck);
 module.exports = {
   app,
   publicApp,
-  certBot,
 };
